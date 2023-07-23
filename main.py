@@ -32,7 +32,7 @@ class Button():
         self.target = target
         self.text = text
         self.index = index
-        self.btn = ct.CTkButton(self.target, text=self.text, command=self.open_note, width=365, height=50, anchor='center')
+        self.btn = ct.CTkButton(self.target, text=self.text, command=self.open_note, width=380, height=50, anchor='center')
 
     def update_btn(self):
         self.btn.grid(row=self.index, column=0, pady=5, padx=(5, 10))
@@ -126,8 +126,21 @@ class MainApp(ct.CTk):
         self.bind('<Escape>', lambda x: self.destroy())
 
         self.main_page_func()
+        self.set_settings()
         self.update_note()
         self.update()
+
+
+    def set_settings(self):
+        file = open(f"{os.getcwd()}/notes/source/settings/settings.json", 'r', encoding='utf-8')
+        color_theme = (json.load(file))["theme_cod"]
+        if (color_theme == 0):
+            ct.set_appearance_mode("dark")
+        elif (color_theme == 1):
+            ct.set_appearance_mode("light")
+        elif (color_theme == 2):
+            ct.set_appearance_mode("system")
+        file.close()
 
     def main_page_func(self):
         self.title('Notes')
@@ -222,17 +235,26 @@ class MainApp(ct.CTk):
             switch.grid(row=num_row, column=0, sticky='w', padx=(40, 0))
         def radios(num_row):
             global mode
+            with open(f"{os.getcwd()}/notes/source/settings/settings.json", 'r', encoding='utf-8') as file:
+                mode = (json.load(file))["theme_cod"]
             def radiobutton_event():
                 global mode
+
+                file = open(f"{os.getcwd()}/notes/source/settings/settings.json", 'w', encoding='utf-8')
                 if (radio_var.get() == 0):
                     ct.set_appearance_mode("dark")
+                    result = {"theme_cod":0}
                     mode = 0
                 elif (radio_var.get() == 1):
                     ct.set_appearance_mode("light")
+                    result = {"theme_cod":1}
                     mode = 1
                 elif (radio_var.get() == 2):
                     ct.set_appearance_mode("system")
+                    result = {"theme_cod":2}
                     mode = 2
+                json.dump(result, file, ensure_ascii=False)
+                file.close()
                 self.update()
             radio_var = tkinter.IntVar(value=mode)
             radio_button_1 = ct.CTkRadioButton(master=self.settings_page, variable=radio_var, value=0, text='Dark', command=radiobutton_event)
